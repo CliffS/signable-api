@@ -92,9 +92,23 @@ sub add_client
 	client_email => $email,
     );
     croak($result->{status_message}) unless $result->{status} eq 'success';
-    return $self->client($result->{client_id});
+    return new Signable::Client($self, {
+	    client_id	=> $result->{client_id},
+	    client_name	=> $name,
+	    client_email => $email,
+	}
+    );
 }
 
+sub activity
+{
+    my $self = shift;
+    my $limit = shift // 100;
+    my $result = $self->post('activity'
+	limit	=> $limit,
+    );
+    return wantarray ? @$result : $result;
+}
 
 sub url
 {
