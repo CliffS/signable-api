@@ -4,7 +4,10 @@ use strict;
 use warnings;
 use 5.14.0;
 
+#use Tie::Hash::Indexed;
+
 use Data::Dumper;
+use Carp;
 
 use Signable::Document;
 
@@ -51,16 +54,32 @@ sub list
 sub parties
 {
     my $self = shift;
-    my $result = $self->submit('parties',
-	template_id => $self->id,
-    );
     local $_;
     my @parties;
-    foreach (@$result)
+    if ($self->{parties})   # only make the call once
     {
-	push @parties, new Signable::Party($self->{request}, $_);
+	@parties = @{$self->{parties}};
+    }
+    else {
+	my $result = $self->submit('parties',
+	    template_id => $self->id,
+	);
+	foreach (@$result)
+	{
+	    push @parties, new Signable::Party($self->{request}, $_);
+	}
+	$self->{parties} = \@parties;
     }
     return wantarray ? @parties : \@parties;
+}
+
+sub party
+{
+    my $self = shift;
+    my $name = shift;
+    my @parties = $self->parties;
+    my ($party) = grep { $_->name eq $name } @parties;
+    return $party;
 }
 
 sub rename
@@ -86,11 +105,44 @@ sub remove
     croak $result->{status_message} unless $result->{status} eq 'success';
 }
 
+sub send
+{
+    my $self = shift;
+    my $protect = shift;
+    my @parties = $self->parties;
+    #tie my %params, 'Tie::Hash::Indexed';
+    my %params;
+    $params{template_id} = $self->id;
+    $params{password_protect} = $protect ? 1 : 0;
+    foreach my $party (0 .. $#parties)
+    {
+	$params{"party_id[$party]"} = $parties[$party]->id;
+	$params{"party_name[$party]"} = $parties[$party]->client;
+	$params{"party_email[$party]"} = $parties[$party]->email;
+	my %fields = $parties[$party]->fields;
+	$params{"merge_field[$_]"} = $fields{$_} foreach (keys %fields);
+    }
+    print Dumper \%params; # exit;
+    $Signable::Request::DEBUG = 1;
+    my @params = %params;
+    my $response = $self->doc_submit('send', @params);
+    return $response;
+}
+
+
 sub submit
 {
     my $self = shift;
     my $func = shift;
     $func = "template/$func";
+    $self->{request}->post($func, @_);
+}
+
+sub doc_submit
+{
+    my $self = shift;
+    my $func = shift;
+    $func = "document/$func";
     $self->{request}->post($func, @_);
 }
 

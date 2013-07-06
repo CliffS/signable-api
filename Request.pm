@@ -6,7 +6,9 @@ use 5.14.0;
 
 use LWP;
 use JSON::XS qw();
+#use Tie::Hash::Indexed;
 use Carp;
+use Data::Dumper;
 
 use Signable::Template;
 use Signable::Document;
@@ -48,6 +50,15 @@ sub templates
 	push @templates, new Signable::Template($self, $_);
     }
     return wantarray ? @templates : \@templates;
+}
+
+sub template
+{
+    my $self = shift;
+    my $id = shift;
+    my @templates = $self->templates;
+    my ($template) = grep { $_->id == $id } @templates;
+    return $template;
 }
 
 sub document
@@ -104,7 +115,7 @@ sub activity
 {
     my $self = shift;
     my $limit = shift // 100;
-    my $result = $self->post('activity'
+    my $result = $self->post('activity',
 	limit	=> $limit,
     );
     return wantarray ? @$result : $result;
@@ -118,6 +129,8 @@ sub url
     return $url;
 }
 
+our $DEBUG = 0;
+
 sub post
 {
     my $self = shift;
@@ -127,7 +140,13 @@ sub post
     $form{api_id} = $self->{apiID};
     $form{api_key} = $self->{apiKey};
     my $response = $self->{ua}->post($url, \%form);
+    if ($DEBUG)
+    {
+	print Dumper $response;
+	exit;
+    }
     my $json = new JSON::XS;
+    croak $response->status_line if $response->is_error;
     $json->decode($response->decoded_content);
 }
 
