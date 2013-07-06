@@ -105,12 +105,11 @@ sub remove
     croak $result->{status_message} unless $result->{status} eq 'success';
 }
 
-sub send
+sub send    # Returns the document ID
 {
     my $self = shift;
     my $protect = shift;
     my @parties = $self->parties;
-    #tie my %params, 'Tie::Hash::Indexed';
     my %params;
     $params{template_id} = $self->id;
     $params{password_protect} = $protect ? 1 : 0;
@@ -122,11 +121,10 @@ sub send
 	my %fields = $parties[$party]->fields;
 	$params{"merge_field[$_]"} = $fields{$_} foreach (keys %fields);
     }
-    print Dumper \%params; # exit;
-    $Signable::Request::DEBUG = 1;
     my @params = %params;
     my $response = $self->doc_submit('send', @params);
-    return $response;
+    croak $response->{status_message} unless $response->{status} eq 'success';
+    return $response->{document}{document_id};
 }
 
 
