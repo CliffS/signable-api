@@ -125,8 +125,9 @@ sub send    # Returns the document ID in scalar context
     my @params = %params;
     my $response = $self->doc_submit('send', @params);
     croak $response->{status_message} unless $response->{status} eq 'success';
+    # print Dumper $response; exit;
     my $id = $response->{document}{document_id};
-    my @clients = grep { $_->{client_id} } @{$response->{party}};
+    my @clients = map { $_->{client_id} } @{$response->{document}{party}};
     return wantarray ? ($id, @clients) : $id;
 }
 
