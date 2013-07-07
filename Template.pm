@@ -105,7 +105,8 @@ sub remove
     croak $result->{status_message} unless $result->{status} eq 'success';
 }
 
-sub send    # Returns the document ID
+sub send    # Returns the document ID in scalar context
+	    # or document ID and client ID(s) in list context
 {
     my $self = shift;
     my $protect = shift;
@@ -124,7 +125,9 @@ sub send    # Returns the document ID
     my @params = %params;
     my $response = $self->doc_submit('send', @params);
     croak $response->{status_message} unless $response->{status} eq 'success';
-    return $response->{document}{document_id};
+    my $id = $response->{document}{document_id};
+    my @clients = grep { $_->{client_id} } @{$response->{party}};
+    return wantarray ? ($id, @clients) : $id;
 }
 
 
