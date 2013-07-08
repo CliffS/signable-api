@@ -51,6 +51,17 @@ sub list
     return wantarray ? @documents : \@documents;
 }
 
+sub document
+{
+    my $self = shift;
+    my $id = shift;
+    say "id = $id";
+    my @docs = $self->list;
+    @docs = grep { $_->id == $id } @docs;
+    croak "Should only be one match" unless @docs == 1;
+    return shift @docs;
+}
+
 sub parties
 {
     my $self = shift;
@@ -105,8 +116,7 @@ sub remove
     croak $result->{status_message} unless $result->{status} eq 'success';
 }
 
-sub send    # Returns the document ID in scalar context
-	    # or document ID and client ID(s) in list context
+sub send    # Returns the document
 {
     my $self = shift;
     my $protect = shift;
@@ -127,8 +137,7 @@ sub send    # Returns the document ID in scalar context
     croak $response->{status_message} unless $response->{status} eq 'success';
     # print Dumper $response; exit;
     my $id = $response->{document}{document_id};
-    my @clients = map { $_->{client_id} } @{$response->{document}{party}};
-    return wantarray ? ($id, @clients) : $id;
+    my $doc = $self->{request}->document($id);
 }
 
 

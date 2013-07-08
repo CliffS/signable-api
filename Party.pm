@@ -32,6 +32,12 @@ sub merge_fields
     return wantarray ? @$merge_fields : $merge_fields;
 }
 
+sub client_id
+{
+    my $self = shift;
+    return $self->{party}{client_id};
+}
+
 sub client
 {
     my $self = shift;
@@ -46,6 +52,12 @@ sub email
     my $email = shift;
     $self->{data}{email} = $email if $email;
     return $self->{data}{email}
+}
+
+sub fingerprint
+{
+    my $self = shift;
+    return $self->{party}{signature_fingerprint};
 }
 
 sub fields
