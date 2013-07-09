@@ -43,15 +43,33 @@ sub update
 sub documents
 {
     my $self = shift;
-    my $result = $self->submit('documents',
-	client_id   => $self->id,
-    );
     my @documents;
-    foreach my $doc (@$result)
+    if ($self->{documents})
     {
-	push @documents, new Signable::Document($doc);
+	@documents = @{$self->{documents}};
+    }
+    else {
+	my $result = $self->submit('documents',
+	    client_id   => $self->id,
+	);
+	foreach my $doc (@$result)
+	{
+	    push @documents, new Signable::Document(
+		$self->{request},
+		$doc
+	    );
+	}
     }
     return wantarray ? @documents : \@documents;
+}
+
+sub document
+{
+    my $self = shift;
+    my $id = shift;
+    my @docs = $self->documents;
+    @docs = grep { $_->id == $id } @docs;
+    return $docs[0];
 }
 
 sub add_mergefield

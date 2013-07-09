@@ -71,7 +71,7 @@ sub parties
     {
 	$parties = $self->{parties};
     }
-    elsif ($self->{document}{party})
+    elsif (ref $self->{document}{party} eq 'ARRAY')
     {
 	my @parties;
 	foreach my $party (@{$self->{document}{party}})
