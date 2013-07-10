@@ -37,7 +37,7 @@ sub fingerprint
     return $self->{document}{template_fingerprint};
 }
 
-use constant SIGNURL => 'https://app.signable.co.uk/contract/sign';
+use constant SIGNURL => 'https://www.signable.co.uk/contract/sign';
 #CLIENT_ID/COMPANY_ID/CONTRACT_ID/CONTRACT_FINGERPRINT/SIGNATURE_FINGERPRINT
 
 sub sign_urls
@@ -57,7 +57,7 @@ sub sign_urls
 	    $self->fingerprint,
 	    $party->fingerprint,
 	);
-	my $url = sprintf('%s/%d/%d/%d/%f/%f', @params);
+	my $url = sprintf('%s/%d/%d/%d/%s/%s', @params);
 	push @urls, $url;
     }
     return wantarray ? @urls : @urls > 1 ? \@urls : $urls[0];
