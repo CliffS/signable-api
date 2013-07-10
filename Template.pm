@@ -136,7 +136,6 @@ sub send    # Returns the document
     my @params = %params;
     my $response = $self->doc_submit('send', @params);
     croak $response->{status_message} unless $response->{status} eq 'success';
-    print Dumper $response; # exit;
     my $id = $response->{document}{document_id};
     my $doc = $self->{request}->document($id);
     return $doc;
