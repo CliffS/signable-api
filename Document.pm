@@ -53,7 +53,7 @@ sub sign_urls
 	    SIGNURL,
 	    $party->client_id,
 	    $self->{request}{apiID},
-	    $self->id,
+	    $self->{document}{template_id},
 	    $self->fingerprint,
 	    $party->fingerprint,
 	);
