@@ -95,6 +95,15 @@ sub parties
     return wantarray ? @$parties : $parties;
 }
 
+sub cancel
+{
+    my $self = shift;
+    $self->submit('cancel',
+	template_id => $self->{document}{template_id},
+	document_id => $self->id,
+    );
+}
+
 sub submit
 {
     my $self = shift;
