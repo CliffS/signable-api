@@ -14,8 +14,8 @@ use Signable::Template;
 use Signable::Document;
 use Signable::Client;
 
-use constant URI => 'https://www.signable.co.uk/rest';
-
+#use constant URI => 'https://www.signable.co.uk/rest';
+use constant URI => 'https://api0.signable.co.uk/rest';
 
 # passed apiKey, apiID, format (optional)
 sub new
