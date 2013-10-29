@@ -61,6 +61,15 @@ sub template
     return $template;
 }
 
+sub newest_template
+{
+    my $self = shift;
+    my @templates = $self->templates;
+    my ($template) = sort { $b->id <=> $a->id } @templates;
+    # get the highest one only
+    return $template;
+}
+
 sub document
 {
     my $self = shift;
