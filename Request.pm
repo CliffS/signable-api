@@ -39,10 +39,16 @@ sub templates
     my $self = shift;
     my $start = shift // 0;
     my $limit = shift // 100;
-    my $result = $self->post('templates',
-	range_start => $start,
-	range_limit => $limit,
-    );
+    my $result;
+    for (1 .. 3)
+    {
+	$result = $self->post('templates',
+	    range_start => $start,
+	    range_limit => $limit,
+	);
+	last if ref $result eq 'ARRAY';
+    }
+    croak Dumper $result unless ref $result eq 'ARRAY';
     local $_;
     my @templates;
     foreach (@$result)
