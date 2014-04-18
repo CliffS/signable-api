@@ -1,4 +1,4 @@
-package Signable::Client;
+package Signable::API::Client;
 
 use strict;
 use warnings;
@@ -54,7 +54,7 @@ sub documents
 	);
 	foreach my $doc (@$result)
 	{
-	    push @documents, new Signable::Document(
+	    push @documents, new Signable::API::Document(
 		$self->{request},
 		$doc
 	    );

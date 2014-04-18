@@ -1,4 +1,4 @@
-package Signable::Template;
+package Signable::API::Template;
 
 use strict;
 use warnings;
@@ -9,8 +9,8 @@ use 5.14.0;
 use Data::Dumper;
 use Carp;
 
-use Signable::Document;
-use Signable::Client;
+use Signable::API::Document;
+use Signable::API::Client;
 
 sub new
 {
@@ -47,7 +47,7 @@ sub list
     my @documents;
     foreach (@$result)
     {
-	push @documents, new Signable::Document($self->{request}, $_);
+	push @documents, new Signable::API::Document($self->{request}, $_);
     }
     return wantarray ? @documents : \@documents;
 }
@@ -78,7 +78,7 @@ sub parties
 	);
 	foreach (@$result)
 	{
-	    push @parties, new Signable::Party($self->{request}, $_);
+	    push @parties, new Signable::API::Party($self->{request}, $_);
 	}
 	$self->{parties} = \@parties;
     }

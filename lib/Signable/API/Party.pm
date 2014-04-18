@@ -1,4 +1,4 @@
-package Signable::Party;
+package Signable::API::Party;
 
 use strict;
 use warnings;

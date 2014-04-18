@@ -1,10 +1,10 @@
-package Signable::Document;
+package Signable::API::Document;
 
 use strict;
 use warnings;
 use 5.14.0;
 
-use Signable::Party;
+use Signable::API::Party;
 
 use Data::Dumper;
 
@@ -76,7 +76,7 @@ sub parties
 	my @parties;
 	foreach my $party (@{$self->{document}{party}})
 	{
-	    push @parties, new Signable::Party($self->{template}, $party);
+	    push @parties, new Signable::API::Party($self->{template}, $party);
 	}
 	$parties = \@parties;
     }
@@ -87,7 +87,7 @@ sub parties
 	my @parties;
 	foreach my $party (@$result)
 	{
-	    push @parties, new Signable::Party($self->{request}, $party);
+	    push @parties, new Signable::API::Party($self->{request}, $party);
 	}
 	$parties = \@parties;
     }

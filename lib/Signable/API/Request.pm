@@ -1,4 +1,4 @@
-package Signable::Request;
+package Signable::API::Request;
 
 use strict;
 use warnings;
@@ -10,9 +10,9 @@ use JSON::XS qw();
 use Carp;
 use Data::Dumper;
 
-use Signable::Template;
-use Signable::Document;
-use Signable::Client;
+use Signable::API::Template;
+use Signable::API::Document;
+use Signable::API::Client;
 
 #use constant URI => 'https://www.signable.co.uk/rest';
 use constant URI => 'https://api0.signable.co.uk/rest';
@@ -53,7 +53,7 @@ sub templates
     my @templates;
     foreach (@$result)
     {
-	push @templates, new Signable::Template($self, $_);
+	push @templates, new Signable::API::Template($self, $_);
     }
     return wantarray ? @templates : \@templates;
 }
@@ -83,7 +83,7 @@ sub document
     my $doc = $self->post('document',
 	document_id	=> $doc_id,
     );
-    return new Signable::Document($self, $doc);
+    return new Signable::API::Document($self, $doc);
 }
 
 sub clients
@@ -93,7 +93,7 @@ sub clients
     my @clients;
     foreach (@$result)
     {
-	push @clients, new Signable::Client($self, $_);
+	push @clients, new Signable::API::Client($self, $_);
     }
     return wantarray ? @clients : \@clients;
 }
@@ -105,7 +105,7 @@ sub client
     my $client = $self->post('client',
 	client_id   => $id,
     );
-    return new Signable::Client($self, $client);
+    return new Signable::API::Client($self, $client);
 }
 
 sub add_client
@@ -118,7 +118,7 @@ sub add_client
 	client_email => $email,
     );
     croak($result->{status_message}) unless $result->{status} eq 'success';
-    return new Signable::Client($self, {
+    return new Signable::API::Client($self, {
 	    client_id	=> $result->{client_id},
 	    client_name	=> $name,
 	    client_email => $email,
