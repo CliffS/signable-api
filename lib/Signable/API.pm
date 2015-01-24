@@ -5,7 +5,7 @@ use warnings;
 use 5.14.0;
 use utf8;
 
-use constant URL => 'https://api.signable.co.uk/v1/';
+use constant URI => 'https://api.signable.co.uk/v1/';
 
 ###################################################################
 ##
@@ -25,6 +25,12 @@ sub new
     $self->{apikey} = shift // croak "No API key passed";
     $self->{ua} = new LWP::UserAgent;
     bless $self, $class;
+}
+
+sub APIKey
+{
+    my $class = shift;
+    $Signable::API::Item::APIKey = shift;
 }
 
 ###################################################################

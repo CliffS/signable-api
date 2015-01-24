@@ -4,164 +4,46 @@ use strict;
 use warnings;
 use 5.14.0;
 
-#use Tie::Hash::Indexed;
+use parent 'Signable::API::Item';
 
-use Data::Dumper;
 use Carp;
 
-use Signable::API::Document;
-use Signable::API::Client;
-
-sub new
-{
-    my $class = shift;
-    my $request = shift;
-    my $template = shift;
-    my $self = {
-	request => $request,
-	template => $template,
-    };
-    bless $self, $class;
-}
-
-sub AUTOLOAD
-{
-    my $self = shift;
-    (my $name = our $AUTOLOAD) =~ s/.*:://;
-    return $self->{template}{"template_$name"};
-}
-
-sub DESTROY { };    # Avoid AUTOLOAD
+###################################################################
+##
+##  Class methods
+##
 
 sub list
 {
-    my $self = shift;
-    my $start = shift // 0;
-    my $limit = shift // 100;
-    my $result = $self->submit('list',
-	range_start => $start,
-	range_limit => $limit,
-	template_fingerprint => $self->fingerprint,
-    );
-    local $_;
-    my @documents;
-    foreach (@$result)
-    {
-	push @documents, new Signable::API::Document($self->{request}, $_);
-    }
-    return wantarray ? @documents : \@documents;
+    my $class = shift;
+    my @templates;
+    my $url = 'templates';
+    do {
+        my $result = $class->get($url);
+        push @templates, @{$result->{templates}};
+        $url = $result->{next};
+    } while ($url);
+    @templates = map { new $class($_); } @templates;
 }
 
-sub document
+sub latest
 {
-    my $self = shift;
-    my $id = shift;
-    say "id = $id";
-    my @docs = $self->list;
-    @docs = grep { $_->id == $id } @docs;
-    croak "Should only be one match" unless @docs == 1;
-    return shift @docs;
+    my $class = shift;
+    my $result = $class->get('templates', offset => -1, limit => 1);
+    my @templates = @{$result->{templates}};
+    return new $class($templates[0]);
 }
 
-sub parties
-{
-    my $self = shift;
-    local $_;
-    my @parties;
-    if ($self->{parties})   # only make the call once
-    {
-	@parties = @{$self->{parties}};
-    }
-    else {
-	my $result = $self->submit('parties',
-	    template_id => $self->id,
-	);
-	foreach (@$result)
-	{
-	    push @parties, new Signable::API::Party($self->{request}, $_);
-	}
-	$self->{parties} = \@parties;
-    }
-    return wantarray ? @parties : \@parties;
-}
+###################################################################
+##
+##  Instance methods
+##
 
-sub party
+sub delete
 {
     my $self = shift;
-    my $name = shift;
-    my @parties = $self->parties;
-    my ($party) = grep { $_->name eq $name } @parties;
-    return $party;
-}
-
-sub rename
-{
-    my $self = shift;
-    my $new_name = shift;
-    my $result = $self->submit('update/title',
-	template_id		=> $self->id,
-	template_fingerprint	=> $self->fingerprint,
-	template_title		=> $new_name,
-    );
-    croak($result->{status_message}) unless $result->{status} eq 'success';
-    $self->{template}{template_title} = $new_name;
-    $self->{template}{template_id} = $result->{template_id};
-}
-
-sub remove
-{
-    my $self = shift;
-    my $result = $self->submit('remove',
-	template_id		=> $self->id,
-    );
-    croak $result->{status_message} unless $result->{status} eq 'success';
-}
-
-sub send    # Returns the document
-{
-    my $self = shift;
-    my $protect = shift;
-    my @parties = $self->parties;
-    my %params;
-    $params{template_id} = $self->id;
-    $params{password_protect} = $protect ? 1 : 0;
-    foreach my $party (0 .. $#parties)
-    {
-	$params{"party_id[$party]"} = $parties[$party]->id;
-	$params{"party_name[$party]"} = $parties[$party]->client;
-	$params{"party_email[$party]"} = $parties[$party]->email;
-	my %fields = $parties[$party]->fields;
-	$params{"merge_field[$_]"} = $fields{$_} foreach (keys %fields);
-    }
-    my @params = %params;
-    my $response = $self->doc_submit('send', @params);
-    croak $response->{status_message} unless $response->{status} eq 'success';
-    my $id = $response->{document}{document_id};
-    my $doc = $self->{request}->document($id);
-    return $doc;
-}
-
-sub clients
-{
-    my $self = shift;
-    my @clients = $self->{clients};
-    return wantarray ? @clients : \@clients;
-}
-
-sub submit
-{
-    my $self = shift;
-    my $func = shift;
-    $func = "template/$func";
-    $self->{request}->post($func, @_);
-}
-
-sub doc_submit
-{
-    my $self = shift;
-    my $func = shift;
-    $func = "document/$func";
-    $self->{request}->post($func, @_);
+    my $result = $self->SUPER::delete('templates', $self->fingerprint);
+    return $result->{message};
 }
 
 1;
