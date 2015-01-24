@@ -5,6 +5,14 @@ use warnings;
 use 5.14.0;
 use utf8;
 
+use Carp;
+
+use Signable::API::Template;
+use Signable::API::Envelope;
+use Signable::API::Document;
+use Signable::API::Party;
+
+
 use constant URI => 'https://api.signable.co.uk/v1/';
 
 ###################################################################

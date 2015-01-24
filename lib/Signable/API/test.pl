@@ -7,16 +7,13 @@ use utf8;
 
 use lib '../..';
 
-use Signable::API::Item;
-use Signable::API::Template;
-use Signable::API::Envelope;
-use Signable::API::Document;
-use Signable::API::Party;
+use Signable::API;
+
 
 use Data::Dumper;
 
-$Signable::API::Item::APIKey = '4405197452bd64a5dc1c80873c81c84c';
-$Signable::API::Item::APIKey = '2b9770a0515f7bf5416f6ec224228b6a';
+Signable::API->APIKey('4405197452bd64a5dc1c80873c81c84c');
+# Signable::API->APIKey('2b9770a0515f7bf5416f6ec224228b6a');
 
 my $template = Signable::API::Template->latest;
 

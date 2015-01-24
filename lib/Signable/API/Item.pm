@@ -7,7 +7,7 @@ use utf8;
 
 use LWP::UserAgent;
 use HTTP::Request;
-use HTTP::Request::Common;
+use HTTP::Request::Common qw( POST );
 use URI;
 use JSON;
 

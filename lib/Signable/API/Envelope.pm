@@ -54,7 +54,7 @@ sub send
     $content{envelope_redirect_url} = $self->redirect_url;
     $content{envelope_documents} = $json->encode($self->documents);
     $content{envelope_parties} = $json->encode($self->parties);
-    $self->post('envelopes', %content);
+    my $response = $self->post('envelopes', %content);
 }
 
 
