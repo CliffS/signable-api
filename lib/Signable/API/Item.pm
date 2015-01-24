@@ -7,6 +7,7 @@ use utf8;
 
 use LWP::UserAgent;
 use HTTP::Request;
+use HTTP::Request::Common;
 use URI;
 use JSON;
 
@@ -89,10 +90,25 @@ sub get
     return $json->decode($response->content);
 }
 
+sub post
+{
+    my $self = shift;
+    my $path = shift;
+    my $url = new URI(join '/', BASEURI, $path);
+    my %content = @_;
+    my $ua = new LWP::UserAgent;
+    my $request = POST $url, Content => \%content;
+    $request->authorization_basic(our $APIKey, 'x');
+    my $response = $ua->request($request);
+    croak $response->status_line unless $response->is_success;
+    my $json = new JSON;
+    return $json->decode($response->content);
+}
+
 sub delete
 {
     my $self = shift;
-    my $url = join '/', BASEURI, @_;
+    my $url = new URI(join '/', BASEURI, @_);
     my $ua = new LWP::UserAgent;
     my $request = new HTTP::Request(DELETE => $url);
     $request->authorization_basic(our $APIKey, 'x');
@@ -101,6 +117,7 @@ sub delete
     my $json = new JSON;
     return $json->decode($response->content);
 }
+
 
 1;
 

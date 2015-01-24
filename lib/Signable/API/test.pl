@@ -9,17 +9,31 @@ use lib '../..';
 
 use Signable::API::Item;
 use Signable::API::Template;
+use Signable::API::Envelope;
+use Signable::API::Document;
+use Signable::API::Party;
 
 use Data::Dumper;
 
 $Signable::API::Item::APIKey = '4405197452bd64a5dc1c80873c81c84c';
+$Signable::API::Item::APIKey = '2b9770a0515f7bf5416f6ec224228b6a';
 
-my @templates = Signable::API::Template->list;
+my $template = Signable::API::Template->latest;
 
-# print Dumper \@templates;
+my $env = new Signable::API::Envelope(
+    title   => 'A test envelope',
+    password_protect => 1,
+    redirect_url => 'http://may.be',
+    document => new Signable::API::Document(
+        title => 'Letter of Engagement',
+        template => $template,
+    ),
+    party   => new Signable::API::Party(
+        name    => 'Cliff Stanford',
+        email   => 'cliff@may.be',
+        id      => $template->party,
+        message => 'Hello there',
+    ),
+);
 
-my $first = Signable::API::Template->latest;
-
-# print Dumper $first;
-
-print Dumper $first->delete;
+print Dumper $env->send;

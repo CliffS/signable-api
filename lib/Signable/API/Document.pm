@@ -4,112 +4,30 @@ use strict;
 use warnings;
 use 5.14.0;
 
-use Signable::API::Party;
+use parent 'Signable::API::Item';
 
-use Data::Dumper;
+use Carp;
 
 sub new
 {
     my $class = shift;
-    my $request = shift;
-    my $document = shift;
-    my $self = {
-	request => $request,
-	document => $document,
-    };
-    bless $self, $class;
-    $self->parties;
+    my $self = $class->SUPER::new(@_);
+    my @required = qw(title template);
+    foreach (@required)
+    {
+        croak "Missing $_ in new $class" unless exists $self->{$_};
+    }
     return $self;
 }
 
-sub AUTOLOAD
+sub TO_JSON
 {
     my $self = shift;
-    (my $name = our $AUTOLOAD) =~ s/.*:://;
-    return $self->{document}{"document_$name"};
-}
-
-sub DESTROY { };    # Avoid AUTOLOAD
-
-sub fingerprint
-{
-    my $self = shift;
-    return $self->{document}{template_fingerprint};
-}
-
-use constant SIGNURL => 'https://www.signable.co.uk/contract/sign';
-#CLIENT_ID/COMPANY_ID/CONTRACT_ID/CONTRACT_FINGERPRINT/SIGNATURE_FINGERPRINT
-
-sub sign_urls
-{
-    my $self = shift;
-    my @parties = $self->parties;
-    my $template_fingerprint = $self->fingerprint;
-    my $company_id = $self->{request}{apiID};
-    my @urls;
-    foreach my $party (@parties)
-    {
-	my @params = (
-	    SIGNURL,
-	    $party->client_id,
-	    $self->{request}{apiID},
-	    $self->{document}{template_id},
-	    $self->fingerprint,
-	    $party->fingerprint,
-	);
-	my $url = sprintf('%s/%d/%d/%d/%s/%s', @params);
-	push @urls, $url;
-    }
-    return wantarray ? @urls : @urls > 1 ? \@urls : $urls[0];
-}
-
-sub parties
-{
-    my $self = shift;
-    my $parties;
-    if ($self->{parties})
-    {
-	$parties = $self->{parties};
-    }
-    elsif (ref $self->{document}{party} eq 'ARRAY')
-    {
-	my @parties;
-	foreach my $party (@{$self->{document}{party}})
-	{
-	    push @parties, new Signable::API::Party($self->{template}, $party);
-	}
-	$parties = \@parties;
-    }
-    else {
-	my $result = $self->submit('parties',
-	    template_id	=> $self->id,
-	);
-	my @parties;
-	foreach my $party (@$result)
-	{
-	    push @parties, new Signable::API::Party($self->{request}, $party);
-	}
-	$parties = \@parties;
-    }
-    $self->{parties} = $parties;
-    return wantarray ? @$parties : $parties;
-}
-
-sub cancel
-{
-    my $self = shift;
-    $self->submit('cancel',
-	template_id => $self->{document}{template_id},
-	document_id => $self->id,
-    );
-}
-
-sub submit
-{
-    my $self = shift;
-    my $func = shift;
-    $func = "document/$func";
-    $self->{request}->post($func, @_);
+    my %hash;
+    $hash{document_title} = $self->title;
+    $hash{document_template_fingerprint} = $self->template->fingerprint;
+    $hash{document_merge_fields} = $self->merge_fields if $self->merge_fields;
+    return \%hash;
 }
 
 1;

@@ -46,4 +46,11 @@ sub delete
     return $result->{message};
 }
 
+sub party
+{
+    my $self = shift;
+    my $parties = $self->parties;
+    return $parties->[0]->{party_id};
+}
+
 1;
