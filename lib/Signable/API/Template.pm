@@ -24,12 +24,13 @@ sub list
         $url = $result->{next};
     } while ($url);
     @templates = map { new $class($_); } @templates;
+    return wantarray ? @templates : \@templates;
 }
 
 sub latest
 {
     my $class = shift;
-    my $result = $class->get('templates', offset => -1, limit => 1);
+    my $result = $class->get('templates', { offset => -1, limit => 1 });
     my @templates = @{$result->{templates}};
     return new $class($templates[0]);
 }

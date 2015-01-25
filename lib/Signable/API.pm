@@ -30,9 +30,10 @@ sub new
 {
     my $class = shift;
     my $apikey = shift // croak "No API key passed";
-    $Signable::API::Item::APIKey = shift;
     my $self = {};
     bless $self, $class;
+    $self->APIKey($apikey);
+    return $self;
 }
 
 ###################################################################

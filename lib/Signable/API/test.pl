@@ -9,25 +9,26 @@ use lib '../..';
 
 use Signable::API;
 
+use constant {
+    TEST    => '4405197452bd64a5dc1c80873c81c84c',
+    LIVE    => '2b9770a0515f7bf5416f6ec224228b6a',
+};
 
 use Data::Dumper;
 
-# Signable::API->APIKey('4405197452bd64a5dc1c80873c81c84c');
-# Signable::API->APIKey('2b9770a0515f7bf5416f6ec224228b6a');
-
-my $sign = new Signable::API('4405197452bd64a5dc1c80873c81c84c');
+my $sign = new Signable::API(LIVE);
 
 my $template = Signable::API::Template->latest;
 
-my $env = new $sign->envelope(
+my $env = $sign->envelope(
     title   => 'A test envelope',
     password_protect => 1,
     redirect_url => 'http://may.be',
-    document => new $sign->document(
+    document => $sign->document(
         title => 'Letter of Engagement',
         template => $template,
     ),
-    party   => new $sign->party(
+    party   => $sign->party(
         name    => 'Cliff Stanford',
         email   => 'cliff@may.be',
         id      => $template->party,

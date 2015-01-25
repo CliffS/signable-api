@@ -37,6 +37,28 @@ sub new
     return $self;
 }
 
+sub fetch
+{
+    my $class = shift;
+    my $fingerprint = shift // croak "No fingerprint";
+    my $response = $self->get('envelopes', $fingerprint);
+    return new $class($response);
+}
+
+sub list
+{
+    my $class = shift;
+    my @envs;
+    my $url = 'envelopes';
+    do {
+        my $result = $class->get($url);
+        push @envs, @{$result->{envs}};
+        $url = $result->{next};
+    } while ($url);
+    @envs = map { new $class($_); } @envs;
+    return wantarray ? @envs : \@envs;
+}
+
 ###################################################################
 ##
 ##  Instance methods
@@ -56,6 +78,27 @@ sub send
     $content{envelope_parties} = $json->encode($self->parties);
     my $response = $self->post('envelopes', %content);
 }
+
+sub reminder
+{
+    my $self = shift;
+    my $response = $self->get('envelopes', $self->fingerprint, 'remind');
+}
+
+sub cancel
+{
+    my $self = shift;
+    my $response = $self->get('envelopes', $self->fingerprint, 'cancel');
+}
+
+sub expire
+{
+    my $self = shift;
+    my $response = $self->get('envelopes', $self->fingerprint, 'expire');
+}
+
+
+
 
 
 
