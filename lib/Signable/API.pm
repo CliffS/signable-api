@@ -29,16 +29,10 @@ use constant URI => 'https://api.signable.co.uk/v1/';
 sub new
 {
     my $class = shift;
-    my $self = {};
-    $self->{apikey} = shift // croak "No API key passed";
-    $self->{ua} = new LWP::UserAgent;
-    bless $self, $class;
-}
-
-sub APIKey
-{
-    my $class = shift;
+    my $apikey = shift // croak "No API key passed";
     $Signable::API::Item::APIKey = shift;
+    my $self = {};
+    bless $self, $class;
 }
 
 ###################################################################
@@ -46,16 +40,38 @@ sub APIKey
 ##  Instance methods
 ##
 
-sub AUTOLOAD
+sub APIKey
 {
     my $self = shift;
     my $value = shift;
-    (my $name = our $AUTOLOAD) =~ s/.*:://;
-    $self->{$name} = $value if defined $value;
-    return $self->{$name};
+    $Signable::API::Item::APIKey = $value if $value;
+    return $Signable::API::Item::APIKey;
 }
 
-sub DESTROY { }
+sub template
+{
+    my $self = shift;
+    return new Signable::API::Template(@_);
+}
+
+sub envelope
+{
+    my $self = shift;
+    return new Signable::API::Envelope(@_);
+}
+
+sub document
+{
+    my $self = shift;
+    return new Signable::API::Document(@_);
+}
+
+sub party
+{
+    my $self = shift;
+    return new Signable::API::Party(@_);
+}
+
 
 1;
 
