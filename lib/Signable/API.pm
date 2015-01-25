@@ -11,6 +11,7 @@ use Signable::API::Template;
 use Signable::API::Envelope;
 use Signable::API::Document;
 use Signable::API::Party;
+use Signable::API::Contact;
 
 
 use constant URI => 'https://api.signable.co.uk/v1/';
@@ -71,6 +72,12 @@ sub party
 {
     my $self = shift;
     return new Signable::API::Party(@_);
+}
+
+sub contact
+{
+    my $self = shift;
+    return new Signable::API::Contact(@_);
 }
 
 

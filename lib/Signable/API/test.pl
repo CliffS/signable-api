@@ -16,7 +16,7 @@ use constant {
 
 use Data::Dumper;
 
-my $sign = new Signable::API(LIVE);
+my $sign = new Signable::API(TEST);
 
 my $template = Signable::API::Template->latest;
 

@@ -48,15 +48,15 @@ sub fetch
 sub list
 {
     my $class = shift;
-    my @envs;
+    my @envelopes;
     my $url = 'envelopes';
     do {
         my $result = $class->get($url);
-        push @envs, @{$result->{envs}};
+        push @envelopes, @{$result->{envelopes}};
         $url = $result->{next};
     } while ($url);
-    @envs = map { new $class($_); } @envs;
-    return wantarray ? @envs : \@envs;
+    @envelopes = map { new $class($_); } @envelopes;
+    return wantarray ? @envelopes : \@envelopes;
 }
 
 ###################################################################
@@ -76,7 +76,7 @@ sub send
     $content{envelope_redirect_url} = $self->redirect_url;
     $content{envelope_documents} = $json->encode($self->documents);
     $content{envelope_parties} = $json->encode($self->parties);
-    my $response = $self->post('envelopes', %content);
+    my $response = $self->post('envelopes', \%content);
 }
 
 sub reminder

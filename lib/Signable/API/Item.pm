@@ -71,15 +71,16 @@ sub debug
 sub get
 {
     my $self = shift;
-    my $path = shift;
+    my $query = pop if ref $_[-1] eq 'HASH';
+    my @path = @_;
     my $url;
-    if ($path =~ m'/')
+    if ($path[0] =~ m'/')
     {
-        $url =  new URI($path);
+        $url =  new URI($path[0]);
     }
     else {
-        $url = new URI(join '/', BASEURI, $path);
-        $url->query_form(@_);
+        $url = new URI(join '/', BASEURI, @path);
+        $url->query_form(%$query);
     }
     my $ua = new LWP::UserAgent;
     my $request = new HTTP::Request(GET => $url);
@@ -90,14 +91,33 @@ sub get
     return $json->decode($response->content);
 }
 
+sub put
+{
+    my $self = shift;
+    my $query = pop if ref $_[-1] eq 'HASH';
+    my $url = new URI(join '/', BASEURI, @_);
+    my $tmp = new URI('http:');
+    $tmp->query_form(%$query);
+    (my $content = $tmp->query) =~ s/\r?\n/\r\n/gs;
+    my $ua = new LWP::UserAgent;
+    my $request = new HTTP::Request(PUT => $url, undef, $content);
+    $request->authorization_basic(our $APIKey, 'x');
+    my $response = $ua->request($request);
+    croak $response->status_line unless $response->is_success;
+    my $json = new JSON;
+    return $json->decode($response->content);
+}
+
 sub post
 {
     my $self = shift;
-    my $path = shift;
-    my $url = new URI(join '/', BASEURI, $path);
-    my %content = @_;
+    my $query = pop if ref $_[-1] eq 'HASH';
+    my $url = new URI(join '/', BASEURI, @_);
+    my $tmp = new URI('http:');
+    $tmp->query_form(%$query);
+    (my $content = $tmp->query) =~ s/\r?\n/\r\n/gs;
     my $ua = new LWP::UserAgent;
-    my $request = POST $url, Content => \%content;
+    my $request = new HTTP::Request(POST => $url, undef, $content);
     $request->authorization_basic(our $APIKey, 'x');
     my $response = $ua->request($request);
     croak $response->status_line unless $response->is_success;
