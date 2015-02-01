@@ -96,9 +96,13 @@ sub put
     my $self = shift;
     my $query = pop if ref $_[-1] eq 'HASH';
     my $url = new URI(join '/', BASEURI, @_);
-    my $tmp = new URI('http:');
-    $tmp->query_form(%$query);
-    (my $content = $tmp->query) =~ s/\r?\n/\r\n/gs;
+    my $content;
+    if ($query)
+    {
+        my $tmp = new URI('http:');
+        $tmp->query_form(%$query);
+        ($content = $tmp->query) =~ s/\r?\n/\r\n/gs;
+    }
     my $ua = new LWP::UserAgent;
     my $request = new HTTP::Request(PUT => $url, undef, $content);
     $request->authorization_basic(our $APIKey, 'x');

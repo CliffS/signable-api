@@ -11,6 +11,8 @@ use JSON;
 use Attribute::Boolean;
 use Carp;
 
+use Data::Dumper;
+
 ###################################################################
 ##
 ##  Local helper functions
@@ -25,15 +27,15 @@ use Carp;
 sub new
 {
     my $class = shift;
-    my %params = @_;
+    my %params = ref $_[0] eq 'HASH' ? %{$_[0]}  : @_;
     $params{documents} = [ $params{document} ] if $params{document};
     $params{parties} = [ $params{party} ] if $params{party};
     delete $params{document};
     delete $params{party};
     my $self = $class->SUPER::new(%params);
     croak "Missing title" unless exists $self->{title};
-    croak "Missing documents" unless ref $self->{documents} eq 'ARRAY';
-    croak "Missing parties" unless ref $self->{parties} eq 'ARRAY';
+#    croak "Missing documents" unless ref $self->{documents} eq 'ARRAY';
+#    croak "Missing parties" unless ref $self->{parties} eq 'ARRAY';
     return $self;
 }
 
@@ -41,8 +43,8 @@ sub fetch
 {
     my $class = shift;
     my $fingerprint = shift // croak "No fingerprint";
-    my $response = $self->get('envelopes', $fingerprint);
-    return new $class($response);
+    my $response = $class->get('envelopes', $fingerprint);
+    return $class->new($response);
 }
 
 sub list
@@ -55,7 +57,7 @@ sub list
         push @envelopes, @{$result->{envelopes}};
         $url = $result->{next};
     } while ($url);
-    @envelopes = map { new $class($_); } @envelopes;
+    @envelopes = map { $class->new($_); } @envelopes;
     return wantarray ? @envelopes : \@envelopes;
 }
 
@@ -82,19 +84,19 @@ sub send
 sub reminder
 {
     my $self = shift;
-    my $response = $self->get('envelopes', $self->fingerprint, 'remind');
+    my $response = $self->put('envelopes', $self->fingerprint, 'remind');
 }
 
 sub cancel
 {
     my $self = shift;
-    my $response = $self->get('envelopes', $self->fingerprint, 'cancel');
+    my $response = $self->put('envelopes', $self->fingerprint, 'cancel');
 }
 
 sub expire
 {
     my $self = shift;
-    my $response = $self->get('envelopes', $self->fingerprint, 'expire');
+    my $response = $self->put('envelopes', $self->fingerprint, 'expire');
 }
 
 

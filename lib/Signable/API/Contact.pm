@@ -5,6 +5,8 @@ use warnings;
 use 5.14.0;
 use utf8;
 
+use Carp;
+
 ###################################################################
 ##
 ##  Local helper functions
